@@ -10,6 +10,7 @@ class Galaxy:
         self.costUpgradeScanner = ""
         self.costUnitTier = ""
         self.costNewHero = ""
+        self.sides = []
 
     def hasPlanet(self, planetName):
         for planet in self.planets:
@@ -69,6 +70,15 @@ class Galaxy:
                 elif line[0:7] == "newHero":
                     self.costNewHero = line.split(": ")[1].strip(" ").strip("\n");
         
+    def readSides(self, fileLocation):
+        f = fileLocation + "/sides.txt"
+        print("location", f)
+        if os.path.isfile(f):
+            print("is file")
+            sidesFile = open(f, "r")
+            for line in sidesFile.readlines():
+                print(line)
+                self.sides.append(line.strip(" ").strip("\n"))
             
 
 class Planet:
@@ -249,8 +259,11 @@ def loadMaps(galaxy, mapDirectory):
 x = loadGalaxy("Resources/planets.txt")
 loadMaps(x, "Resources/Games")
 x.readCosts("Resources")
+x.readSides("Resources")
 print(x.costBattalion, x.costFleet, x.costInfiltrationTeam, x.costUpgradeScanner, x.costUnitTier, x.costNewHero) 
-      
+
+print(x.sides)
+
 for y in x.climates:
     print(y.name);
     for z in y.mapsInfiltrate:
