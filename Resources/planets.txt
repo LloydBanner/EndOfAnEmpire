@@ -1,0 +1,210 @@
+PlanetCoruscant:
+pos: (0,0)
+population: high
+resources: low
+owner: empire
+force: medium
+forceSide: netural
+support: high
+creditProduction: high
+climate: city
+
+PlanetHoth:
+pos: (0,-400)
+population: low
+resources: low
+owner: empire
+force: low
+forceSide: netural
+support: medium
+creditProduction: low
+climate: snow 
+
+PlanetRhenVar:
+pos: (400,-100)
+population: low
+resources: low
+owner: none
+force: High
+forceSide: netural
+support: medium
+creditProduction: low
+climate: snow
+
+PlanetSullust:
+pos: (100,-350)
+population: medium
+resources: medium
+owner: empire
+force: medium
+forceSide: netural
+support: medium
+creditProduction: medium
+climate: lava
+
+PlanetMustafar:
+pos: (50,-450)
+population: low
+resources: high
+owner: empire
+force: high
+forceSide: dark
+support: high
+creditProduction: medium
+climate: lava
+
+PlanetEndor:
+pos: (-200,-300)
+population: medium
+resources: low
+owner: newRepublic
+force: medium
+forceSide: light
+support: high
+creditProduction: low
+climate: forest
+
+PlanetTatooine:
+pos: (300,-300)
+population: medium
+resources: low
+owner: newRepublic
+force: low
+forceSide: netural
+support: medium
+creditProduction: medium
+climate: desert
+
+PlanetKashyyyk:
+pos: (200,50)
+population: medium
+resources: medium
+owner: none
+force: low
+forceSide: netural
+support: medium
+creditProduction: medium
+climate: forest
+
+PlanetBespin:
+pos: (50,-350)
+population: high
+resources: high
+owner: none
+force: low
+forceSide: netural
+support: medium
+creditProduction: medium
+climate: city
+
+PlanetNaboo:
+pos: (200,-300)
+population: medium
+resources: medium
+owner: none
+force: low
+forceSide: netural
+support: medium
+creditProduction: medium
+climate: plains, temple
+
+PlanetYavin4:
+pos: (200,200)
+population: low
+resources: low
+owner: newRepublic
+force: high
+forceSide: netural
+support: medium
+creditProduction: low
+climate: forest, temple
+
+PlanetDagobah:
+pos: (150,-500)
+population: low
+resources: low
+owner: newRepublic
+force: high
+forceSide: light
+support: high
+creditProduction: low
+climate: forest
+
+PlanetFelucia:
+pos: (300,200)
+population: medium
+resources: medium
+owner: none
+force: low
+forceSide: neutral
+support: medium
+creditProduction: medium
+climate: flowers
+
+PlanetKamino:
+pos: (500,-250)
+population: medium
+resources: medium
+owner: none
+force: low
+forceSide: neutral
+support: medium
+creditProduction: medium
+climate: ocean
+
+PlanetScarif:
+pos: (350,-200)
+population: medium
+resources: medium
+owner: empire
+force: low
+forceSide: neutral
+support: medium
+creditProduction: medium
+climate: desert
+
+PlanetKessel:
+pos: (300,0)
+population: medium
+resources: high
+owner: none
+force: low
+forceSide: neutral
+support: medium
+creditProduction: high
+climate: city, ship
+
+PlanetPolisMassa:
+pos: (100,-500)
+population: low
+resources: high
+owner: newRepublic
+force: low
+forceSide: neutral
+support: medium
+creditProduction: medium
+climate: ship
+
+PlanetMygeeto:
+pos: (0,300)
+population: medium
+resources: medium
+owner: none
+force: low
+forceSide: neutral
+support: medium
+creditProduction: medium
+climate: lava
+
+PlanetUtapau:
+pos: (200,-500)
+population: medium
+resources: medium
+owner: none
+force: medium
+forceSide: netural
+support: medium
+creditProduction: medium
+climate: rocky
+
+

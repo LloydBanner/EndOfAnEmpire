@@ -1,0 +1,44 @@
+PlanetHoth:
+mapsLand: (hoth, supremacy, defend)
+
+PlanetEndor:
+mapsLand: (Endor, attack)
+
+PlanetTatooine:
+mapsLand: (JabasPalace, team)
+mapsInfiltrate: (JabasPalace, onslaught)
+
+PlanetBespin:
+mapsLand: (Bespin, team)
+mapsInflitrate: (Bespin, onslaught)
+
+PlanetYavin4:
+mapsLand: (Yavin4, supremacy, team, defend)
+mapsInfiltrate: (Yavin4Temple, onslaught)
+
+PlanetScarif:
+mapsLand: (Scarif, supremacy, attack)
+
+PlanetKessel:
+mapsLand: (Kessel, team) 
+mapsInfiltrate: (Kessel, onslaught) 
+
+ClimateSnow:
+mapsLand: (Hoth, supremacy, team) 
+mapsInfiltrate: (Hoth, onslaught)
+
+ClimateForest:
+mapsLand: (Endor, team)
+mapsInfiltrate: (Endor, onslaught)
+
+ClimateDesert:
+mapsLand: (MosEisley, supremacy, defend, team)
+mapsInfiltrate: (MosEisely, onslaught)
+
+ClimateShip:
+mapsLand: (DeathStar2, supremacy, attack, team)
+mapsInfiltrate: (DeathStar2, onslaught)
+mapsSpace: (Endor, assault), (FondorShipyard, assault)
+mapsSpaceInfiltrate: (Endor, onslaught), (FondorShipyard, onslaught)
+
+End

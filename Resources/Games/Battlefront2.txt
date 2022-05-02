@@ -1,0 +1,67 @@
+PlanetCoruscant:
+mapsLand: (Coruscant, conquest)
+mapsInfiltrate: (Coruscant, cap2)
+
+PlanetHoth:
+mapsLand: (Hoth, conquest)
+mapsInfiltrate: (Hoth, cap1, hunt, xl)
+huntDescription: While capturing imperial information wampas attack. Hold them off while the information is secured.
+
+PlanetMustafar:
+mapsLand: (Mustafar, conquest)
+mapsInfiltrate: (Mustafar, cap2)
+
+PlanetEndor:
+mapsLand: (Endor, conquest)
+mapsInfiltrate: (Endor, cap1, hunt)
+huntDestription: Aid the ewoks in disrupting the empire while a team infiltrate their base.
+
+PlanetTatooine:
+mapsLand: (MosEisely, conquest), (JabbasPalace, conquest)
+mapsInfiltrate: (JabbasPalace, cap1), (MosEisely, hunt, cap2)
+huntDescription: Side with the Jawas or Tuskens. They will provide vital information if you win.
+
+PlanetKashyyyk:
+mapsLand: (Kashyyyk, conquest)
+mapsInfiltrate: (kashyyyk, cap2, xl)
+
+PlanetNaboo:
+mapsLand: (Naboo, conquest)
+mapsInfiltrate: (Naboo, cap2, hunt)
+huntDescription: Wealthy merchants have come to blows with the gungans. They've repaired a battalion of battle droids. Choose a side in this conflict to gain vital information from the victor.
+
+PlanetYavin4:
+mapsLand: (Yavin4, conquest)
+mapsInfiltrate: (Yavin4, cap1)
+
+PlanetDagobah:
+mapsLand: (Dagobah, conquest)
+mapsInfiltrate: (Dagobah, cap1)
+
+PlanetFelucia:
+mapsLand: (Felucia, conquest)
+mapsInfiltrate: (Felucia, cap1)
+
+PlanetKamino:
+mapsLand: (Kamino, conquest)
+Mapsinfiltrate: (Kamino, cap1)
+
+PlanetPolisMassa:
+mapsLand: (PolisMassa, conquest)
+mapsInfiltrate: (PolisMassa, cap2)
+
+PlanetMygeeto:
+mapsLand: (Mygeeto, conquest)
+mapsInfiltrate: (Mygeeto, cap2)
+
+PlanetUtapau:
+mapsLand: (Utapau, conquest)
+mapsInfiltrate: (Utapau, cap1)
+
+ClimateShip:
+mapsLand: (TantiveIV, conquest), (DeathStar, conquest) 
+mapsInfiltrate: (TantiveIV, cap1), (DeathStar, cap1)
+mapsSpace: (SpaceHoth, assault), (SpaceYavin, assault), (SpaceTatooine, assault)
+mapsSpaceInfiltrate: (SpaceHoth, cap1), (SpaceYavin, cap1), (SpaceTatooine, cap1)
+
+End

@@ -1,0 +1,7 @@
+battalion: 1000c
+fleet: 1000c
+infiltrationTeam: 500c
+upgradeScanner: 500c
+unitTier: 500r
+newHero: 2000r
+

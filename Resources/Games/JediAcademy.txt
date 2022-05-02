@@ -1,0 +1,31 @@
+PlanetCoruscant:
+mapsInfiltrate: (Coruscant, cap2)
+
+PlanetRhenVar:
+mapInflitrate: (RiftSanctuary, teamDuel)
+
+PlanetTatooine:
+mapsInfiltrate: (TatooineCity, teamDuel), (RancorPit, duel)
+
+PlanetYavin4:
+mapsInfiltrate: (Yavin, cap2, duel)
+
+PlanetBespin:
+mapsInfiltrate: (Bespin, duel)
+
+ClimateShip:
+mapsInfiltrate: (Vjun, teamDuel, duel), (GeneratorRoom, duel), (ImperialShaft, duel), (ImprialControlRoom, duel)
+
+ClimateCity:
+mapsInfiltrate: (Factory, cap2), (Vjun, teamDuel, duel), (GeneratorRoom, duel), (ImperialShaft, duel), (ImprialControlRoom, duel)
+ 
+ClimateSnow:
+mapsInfiltrate: (Hoth, cap2, duel)
+
+ClimateLava:
+mapsInfiltrate: (Taspir, duel, teamDuel)
+
+ClimateTemple:
+mapsInfiltrate: (AbandonedCity, duel), (KorribanTombs, teamDuel)
+
+End

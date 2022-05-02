@@ -1,0 +1,19 @@
+PlanetHoth:
+mapsLand: (TwilightHoth, walker), (OutpostBetaHoth, walker)
+
+ClimateSnow:
+mapsInfiltrate: (Hoth, heroBattle, survival, battle), (IceCaves, survival)
+
+ClimateLava:
+mapsLand: (SorosuubComplex, walker)
+mapsInfiltrate: (Sullust, survival, heroBattle, battle)
+
+ClimateDesert:
+mapsLand: (JundlandWastes, walker), (GraveyardOfGiants, walker)
+mapsInfiltrate: (Tatooine, survival, heroBattle, battle), (RebelDepot, survival)
+
+ClimateForest:
+mapsLand: (EndorMoon, walker), (SurvivorsOfEndor, walker)
+mapsInfiltrate: (Endor, survival, heroBattle, battle)
+
+End

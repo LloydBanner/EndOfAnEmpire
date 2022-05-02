@@ -1,0 +1,4 @@
+ClimateShip:
+mapsSpace: (Esseles, assault), (FostarHaven, assault), (Galitan, assault), (NadiriDockyards, assault), (Sissubo, assault), (Yavin, assault), (ZavianAbyss, assault)
+
+End

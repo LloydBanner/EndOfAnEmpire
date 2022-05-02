@@ -1,0 +1,26 @@
+PlanetHoth:
+mapsLand: (Hoth, conquest)
+
+PlanetEndor:
+mapsLand: (EndorBunker, conquest)
+
+PlanetTatooine:
+mapsLand: (JabbasPalace, conquest), (MosEisely, conquest), (TatooineDuneSea, conquest)
+
+PlanetKashyyyk:
+mapsLand: (KashyyykDocks, conquest), (KashyyykIslands, conquest)
+
+PlanetBespin:
+mapsLand: (BespinPlatfroms, conquest), (BespinCloudCity, conquest)
+
+PlanetNaboo:
+mapsLand: (NabooPlains, conquest), (NabooTheed, conquest)
+
+PlanetYavin4:
+mapsLand: (Yavin4Temple, conquest), (Yavin4Arena, conquest)
+
+ClimateSnow:
+mapsLand: (RhenVarHarbor, conquest), (RhenVarCitadel, conquest)
+
+End
+

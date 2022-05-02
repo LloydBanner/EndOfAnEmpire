@@ -1,0 +1,16 @@
+PlanetBespin:
+mapsInfiltrate: (BespinStreets, teamduel), (BespinExaustShaft, teamDuel, cap2), (CarbonChamber, duel), (BespinAirVanes, duel)
+
+climateRocky:
+mapsInfiltrate: (BattleGroundJedi, duel)
+
+ClimateTemple:
+mapsInfiltrate: (CeremonialHall, duel), (LightSaberTraining, duel), (MassassiTemple, teamDuel), (TempleTournament, teamDuel, cap2)
+
+ClimateCity:
+mapsInfiltrate: (NarshadaaStreets, teamDuel), (WarringFactions, teamDuel, cap2), (GarbageFacility, teamDuel), (TrialPit, teamDuel, duel)
+
+ClimateShip:
+mapsInfiltrate: (imperialShuttleBay, duel), (HangarBay72, duel), (ImperialLabsRaven, duel, teamDuel), (DeathStar, teamDuel), (StarDestroyer, teamDuel), (Garrison27D, teamDuel, cap2)
+
+End 
