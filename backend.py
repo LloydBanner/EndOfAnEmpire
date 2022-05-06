@@ -1,4 +1,48 @@
+import pickle
+import uuid
 import os
+
+class PlayingTable:
+    def __init__(self):
+        self.galaxy = loadGalaxy("Resources/planets.txt")
+        loadMaps(self.galaxy, "Resources/Games")
+        self.galaxy.readCosts("Resources")
+        self.galaxy.readSides("Resources")
+
+        
+
+        for y in self.galaxy.planets:
+            print(y.name)
+
+        self.galaxy.updateGalaxyMap()
+
+        
+        for line in self.galaxy.galaxyMap:
+            print(line)
+
+    def returnSideOptions(self):
+        return self.galaxy.sides
+
+    def createGame(self, playerSide):
+        person = Player(playerSide, True)
+        self.galaxy.players.append(person)
+        for side in self.galaxy.sides:
+            if side != playerSide:
+                computer = Player(side, False)
+
+    
+    def returnGalaxyMap(self):
+        self.galaxy.updateGalaxyMap()
+        return self.galaxy.galaxyMap
+
+    def getPlanetOwner(self, planetName):
+        for planet in self.galaxy.planets:
+            if planet.name == planetName:
+                return planet.owner
+        return "error"
+        
+
+            
 
 class Galaxy:
     def __init__(self):
@@ -11,6 +55,9 @@ class Galaxy:
         self.costUnitTier = ""
         self.costNewHero = ""
         self.sides = []
+        self.size = 600
+        self.galaxyMap = [[]]
+        self.players = []
 
     def hasPlanet(self, planetName):
         for planet in self.planets:
@@ -79,6 +126,26 @@ class Galaxy:
             for line in sidesFile.readlines():
                 print(line)
                 self.sides.append(line.strip(" ").strip("\n"))
+
+    def updateGalaxyMap(self):
+        widthHeight = (self.size*2)/50
+        row = [];
+        galaxyMap = []
+        for i in range(widthHeight):
+            for j in range(widthHeight):
+                row.append([])
+            galaxyMap += [row]
+            row = []
+        
+        for planet in self.planets:
+            pos = planet.position.strip(" ").strip("(").strip(")")
+            xPos, yPos = pos.split(",")
+
+            newYPos = (int(xPos) + self.size)/50
+            newXPos = ((self.size*2) - (int(yPos) + self.size))/50
+            galaxyMap[newXPos][newYPos].append(planet.name)
+            
+        self.galaxyMap = galaxyMap
             
 
 class Planet:
@@ -137,6 +204,34 @@ class Map:
 
     def addModeDescription(self, description):
         self.modesDescription = description
+
+class Player:
+    def __init__(self, side, isHuman):
+        self.side = side
+        self.isHuman = isHuman
+        self.fleets = []
+        self.credits = 2000
+        self.resources = 1000
+
+    def getFleet(self, fleetId):
+        for fleet in self.fleets:
+            if fleet.id == fleetId:
+                return fleet
+
+    def addFleet(self, fleet):
+        fleets.append(fleet)
+
+class Fleet:
+    def __init__(self, numBattalions, numSquadrons, numHeros, numInfiltration, side, xPos, yPos):
+        self.idVal = "Fleet" + uuid.uuid4()
+        self.numBattalions = numBattalions
+        self.numSquadrons = numSquadrons
+        self.numHeros = numHeros
+        self.numInfiltration = numInfiltration
+        self.side = side
+        self.xPos = xPos
+        self.yPos = yPos
+ 
 
 #list of list of planet, each planet list is (planetName[0], position (x, y)[1], population[2], resources[3], owner[4], force[5], forceSide[6], support[7], creditProduction[8], climate[9])
 def loadGalaxy(fileLocation):
@@ -255,18 +350,7 @@ def loadMaps(galaxy, mapDirectory):
                         
                         
 
-#"Resources/Games"
-x = loadGalaxy("Resources/planets.txt")
-loadMaps(x, "Resources/Games")
-x.readCosts("Resources")
-x.readSides("Resources")
-print(x.costBattalion, x.costFleet, x.costInfiltrationTeam, x.costUpgradeScanner, x.costUnitTier, x.costNewHero) 
 
-print(x.sides)
 
-for y in x.climates:
-    print(y.name);
-    for z in y.mapsInfiltrate:
-        print(z.name, z.modes, z.game)
-    if y.mapsInfiltrate == []:
-        print("Oh no!")
+table = PlayingTable()
+
