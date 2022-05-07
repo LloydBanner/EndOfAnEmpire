@@ -40,6 +40,20 @@ class PlayingTable:
             if planet.name == planetName:
                 return planet.owner
         return "error"
+
+    def getFleet(self, fleetName):
+        players = self.galaxy.players
+        for player in players:
+            for fleet in player.fleets:
+                if fleet.idVal == fleetName:
+                    return fleet
+        return "error"
+
+    def addPlayerFleet(self, side, xPos, yPos, numBattalions, numSquadrons, numHeros, numInfiltration):
+        players = self.galaxy.players
+        for player in players:
+            if side == player.side:
+                player.addFleet(xPos, yPos, numBattalions, numSquadrons, numHeros, numInfiltration)
         
 
             
@@ -138,13 +152,18 @@ class Galaxy:
             row = []
         
         for planet in self.planets:
-            pos = planet.position.strip(" ").strip("(").strip(")")
-            xPos, yPos = pos.split(",")
+            ##pos = planet.position.strip(" ").strip("(").strip(")")
+            ##xPos, yPos = pos.split(",")
 
-            newYPos = (int(xPos) + self.size)/50
-            newXPos = ((self.size*2) - (int(yPos) + self.size))/50
-            galaxyMap[newXPos][newYPos].append(planet.name)
-            
+            ##newYPos = (int(xPos) + self.size)/50
+            ##newXPos = ((self.size*2) - (int(yPos) + self.size))/50
+            galaxyMap[planet.xPos][planet.yPos].append(planet.name)
+
+        for player in self.players:
+            for fleet in player.fleets:
+                galaxyMap[fleet.xPos][fleet.yPos].append(fleet.idVal)
+
+        print(galaxyMap)    
         self.galaxyMap = galaxyMap
             
 
@@ -162,6 +181,20 @@ class Planet:
         self.climate = climate
         self.mapsLand = []
         self.mapsInfiltrate = []
+
+        self.galaxySize = 600
+
+        
+        pos = self.position.strip(" ").strip("(").strip(")")
+        xPos, yPos = pos.split(",")
+
+        newYPos = (int(xPos) + self.galaxySize)/50
+        newXPos = ((self.galaxySize*2) - (int(yPos) + self.galaxySize))/50
+
+        self.xPos = newXPos
+        self.yPos = newYPos
+
+        
 
     def addMapsLand(self, maps):
         for newMap in maps:
@@ -218,12 +251,13 @@ class Player:
             if fleet.id == fleetId:
                 return fleet
 
-    def addFleet(self, fleet):
-        fleets.append(fleet)
+    def addFleet(self, xPos, yPos, numBattalions, numSquadrons, numHeros, numInfiltration):
+        newFleet = Fleet(numBattalions, numSquadrons, numHeros, numInfiltration, self.side, xPos, yPos)
+        self.fleets.append(newFleet)
 
 class Fleet:
     def __init__(self, numBattalions, numSquadrons, numHeros, numInfiltration, side, xPos, yPos):
-        self.idVal = "Fleet" + uuid.uuid4()
+        self.idVal = "Fleet" + str(uuid.uuid4())
         self.numBattalions = numBattalions
         self.numSquadrons = numSquadrons
         self.numHeros = numHeros

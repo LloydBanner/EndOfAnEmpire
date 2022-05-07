@@ -42,36 +42,63 @@ class commandLineInterface:
                 return r
 
     def turnSequence(self):
-        currentMap = self.table.returnGalaxyMap()
+        self.table.addPlayerFleet("empire", 1, 14, 1, 0, 0, 0) 
+        self.table.addPlayerFleet("newRepublic", 20, 14, 1, 0, 0, 0) 
+        self.table.addPlayerFleet("empire", 12, 12, 1, 0, 0, 0) 
+        self.table.addPlayerFleet("empire", 10, 16, 1, 0, 0, 0)
+        currentMap = self.table.returnGalaxyMap() 
         self.displayUserFriendlyMap(currentMap)
 
     def displayUserFriendlyMap(self, aMap):
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        toPrint = "  |"
+        betweenRows = "--+"
+        for i in range(len(aMap[0])):
+            toPrint += alphabet[i] + "|"
+            betweenRows += "-+"
+        print(toPrint)
+        print(betweenRows)
+        rowNum = 0;
         for row in aMap:
-            toPrint = ""
+            rowNum += 1
+            if len(str(rowNum)) == 1:
+                toPrint = str(rowNum) + " |"
+            else:
+                toPrint = str(rowNum) + "|"
+            sectorNum = 0
             for sector in row:
                 if not sector:
                     toPrint += " "
                 elif len(sector) > 1:
-                    for idVal in sector:
-                        if idVal[0:6] == "Planet":
-                            owner = self.table.getPlanetOwner(idVal)
-                            if owner != "none":
-                                toPrint += owner[0].upper()
-                            else:
-                                toPrint += "U"
-                        else:
+                    if sector[0][0:6] == "Planet":
                             ownersEqual = True
                             firstOwner = ""
-                            for thing in sector:
+                            for fleetName in sector[1:]:
+                                fleet = self.table.getFleet(fleetName)
                                 if firstOwner == "":
-                                    firstOwner = thing.side
-                                elif firstOwner != thing.side:
+                                    firstOwner = fleet.side
+                                elif firstOwner != fleet:
                                     ownersEqual = False
 
                             if ownersEqual:
                                 toPrint += firstOwner[0].lower()
                             else:
                                 toPrint += "x"
+                    else:
+                        ownersEqual = True
+                        firstOwner = ""
+                        for fleetName in sector:
+                            fleet = self.table.getFleet(fleetName)
+                            print(fleetName)
+                            if firstOwner == "":
+                                firstOwner = fleet.side
+                            elif firstOwner != fleet:
+                                ownersEqual = False
+
+                        if ownersEqual:
+                            toPrint += firstOwner[0].lower()
+                        else:
+                            toPrint += "x"
                 else:
                     if sector[0][0:6] == "Planet":
                         owner = self.table.getPlanetOwner(sector[0])
@@ -80,10 +107,36 @@ class commandLineInterface:
                         else:
                             toPrint += "U"
                     else:
-                        owner = sector[0].side()
+                        fleet = self.table.getFleet(sector[0])
+                        owner = fleet.side
                         toPrint += owner[0].lower()
+
+                if row[sectorNum]:
+                    currentSectorIsplanet = row[sectorNum][0][0:6]
+                else:
+                    currentSectorIsplanet = "no"
+                if len(row) > sectorNum+1:
+                    if row[sectorNum+1]:
+                        nextSectorIsPlanet = row[sectorNum+1][0][0:6]
+                    else:
+                        nextSectorIsPlanet = "no"
+                    if nextSectorIsPlanet == "Planet":
+                        if currentSectorIsplanet == "Planet":
+                            toPrint += "#"
+                        else:
+                            toPrint += "<"
+                    elif currentSectorIsplanet == "Planet":
+                        toPrint += ">"
+                    else:
+                        toPrint += "|"
+                elif currentSectorIsplanet == "Planet":
+                    toPrint += ">"
+                else:        
+                    toPrint += "|"
+                sectorNum += 1
                         
             print(toPrint)
+            print(betweenRows)
     
 
 start = commandLineInterface()
