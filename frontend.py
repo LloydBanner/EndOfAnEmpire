@@ -46,9 +46,54 @@ class commandLineInterface:
         self.table.addPlayerFleet("newRepublic", 20, 14, 1, 0, 0, 0) 
         self.table.addPlayerFleet("empire", 12, 12, 1, 0, 0, 0) 
         self.table.addPlayerFleet("empire", 10, 16, 1, 0, 0, 0)
-        currentMap = self.table.returnGalaxyMap() 
-        self.displayUserFriendlyMap(currentMap)
+        playing = True
+        while playing:
+            currentMap = self.table.returnGalaxyMap() 
+            self.displayUserFriendlyMap(currentMap)
+            currentPlayer = self.table.getNextPlayer()
+            endOfTurn = False
+            if currentPlayer.isHuman == True:
+                while not endOfTurn:
+                    r = raw_input("Select a sector to where you would like to perform an action or end your turn (end): ")
+                    if r == "end":
+                        endOfTurn = True
+                    else:
+                        contentSector = self.findSector(r)
+                        if contentSector == "notASector":
+                            print("Invalid Selection, please try again")
+                        else:
+                            print(contentSector)
+                            sectorSelection = True
+                            while sectorSelection:
+                                r = raw_input("Type a number to select the thing in the sector or exit (0): ")
+                                num = int(r)
+                                if num != 0:
+                                    if num-1 < len(contentSector):
+                                        self.activate(contentSector[num-1])
+                                else:
+                                    sectorSelection = False         
+            else:
+                print("AI turn")
 
+    def activate(self, galacticObject):
+        if galacticObject[0:6] == "Planet":
+            planet = self.table.galaxy.getPlanet(galacticObject)
+            print(planet.name)
+            print("Controlled by: " + planet.owner)
+            print("Population: " + str(planet.population))
+            print("Resource Production: " + str(planet.resources))
+            print("Credit Production: " + str(planet.creditProduction))
+        else:
+            fleet = self.table.getFleet(galacticObject)
+            print(fleet.idVal)
+            print("Owned by: " + fleet.side)
+            print("Number of battalions: " + str(fleet.numBattalions))
+            print("Number of squadrons: " + str(fleet.numSquadrons))
+            print("Number of heros: " + str(fleet.numHeros))
+            print("Number of infiltration teams: " + str(fleet.numInfiltration))
+            
+            
+                
     def displayUserFriendlyMap(self, aMap):
         alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         toPrint = "  |"
@@ -137,6 +182,24 @@ class commandLineInterface:
                         
             print(toPrint)
             print(betweenRows)
+
+    def findSector(self, userInput):
+        currentMap = self.table.returnGalaxyMap() 
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        num = int(userInput[1:])
+        letter = userInput[0]
+        if num <= len(currentMap):
+            width = len(currentMap[0])
+            if letter in alphabet[:width]:
+                numLetter = 0
+                for char in alphabet:
+                    if char == letter:
+                        break
+                    else:
+                        numLetter += 1
+                return currentMap[num-1][numLetter]
+        return "notASector"
+        
     
 
 start = commandLineInterface()

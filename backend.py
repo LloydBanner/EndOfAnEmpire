@@ -4,6 +4,7 @@ import os
 
 class PlayingTable:
     def __init__(self):
+        self.whoseTurn = ""
         self.galaxy = loadGalaxy("Resources/planets.txt")
         loadMaps(self.galaxy, "Resources/Games")
         self.galaxy.readCosts("Resources")
@@ -26,9 +27,11 @@ class PlayingTable:
     def createGame(self, playerSide):
         person = Player(playerSide, True)
         self.galaxy.players.append(person)
+        self.whoseTurn = playerSide
         for side in self.galaxy.sides:
             if side != playerSide:
                 computer = Player(side, False)
+                self.galaxy.players.append(computer)
 
     
     def returnGalaxyMap(self):
@@ -54,6 +57,20 @@ class PlayingTable:
         for player in players:
             if side == player.side:
                 player.addFleet(xPos, yPos, numBattalions, numSquadrons, numHeros, numInfiltration)
+
+    def getNextPlayer(self):
+        returnSide = self.whoseTurn
+        nextTurn = 0
+        for side in self.galaxy.sides:
+            nextTurn += 1
+            if side == self.whoseTurn:
+                break
+        if nextTurn < len(self.galaxy.sides):
+            self.whoseTurn = self.galaxy.sides[nextTurn]
+        else:
+            self.whoseTurn = self.galaxy.sides[0]
+        return self.galaxy.getPlayer(returnSide)
+        
         
 
             
@@ -162,9 +179,13 @@ class Galaxy:
         for player in self.players:
             for fleet in player.fleets:
                 galaxyMap[fleet.xPos][fleet.yPos].append(fleet.idVal)
-
-        print(galaxyMap)    
+    
         self.galaxyMap = galaxyMap
+
+    def getPlayer(self, side):
+        for player in self.players:
+            if player.side == side:
+                return player
             
 
 class Planet:
