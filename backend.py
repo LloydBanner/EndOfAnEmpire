@@ -70,6 +70,23 @@ class PlayingTable:
         else:
             self.whoseTurn = self.galaxy.sides[0]
         return self.galaxy.getPlayer(returnSide)
+
+    def purchaseSquadron(self, player, position):
+        if int(player.credits) >= int(self.galaxy.costFleet.strip("c")):
+            player.credits = int(player.credits) - int(self.galaxy.costFleet.strip("c"))
+            self.addPlayerFleet(player.side, position[0], position[1], 0, 1, 0, 0)
+            return True
+        else:
+            return False
+
+    def purchaseBattalion(self, player, position):
+        if int(player.credits) >= int(self.galaxy.costFleet.strip("c")):
+            player.credits = int(player.credits) - int(self.galaxy.costFleet.strip("c"))
+            self.addPlayerFleet(player.side, position[0], position[1], 1, 0, 0, 0)
+            return True
+        else:
+            return False
+        
         
         
 

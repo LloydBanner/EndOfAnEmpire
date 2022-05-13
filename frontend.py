@@ -54,11 +54,11 @@ class commandLineInterface:
             endOfTurn = False
             if currentPlayer.isHuman == True:
                 while not endOfTurn:
-                    r = raw_input("Select a sector to where you would like to perform an action or end your turn (end): ")
-                    if r == "end":
+                    position = raw_input("Select a sector to where you would like to perform an action or end your turn (end): ")
+                    if position == "end":
                         endOfTurn = True
                     else:
-                        contentSector = self.findSector(r)
+                        contentSector = self.findSector(position)
                         if contentSector == "notASector":
                             print("Invalid Selection, please try again")
                         else:
@@ -69,13 +69,13 @@ class commandLineInterface:
                                 num = int(r)
                                 if num != 0:
                                     if num-1 < len(contentSector):
-                                        self.activate(contentSector[num-1])
+                                        self.activate(contentSector[num-1], currentPlayer, position)
                                 else:
                                     sectorSelection = False         
             else:
                 print("AI turn")
 
-    def activate(self, galacticObject):
+    def activate(self, galacticObject, currentPlayer, position):
         if galacticObject[0:6] == "Planet":
             planet = self.table.galaxy.getPlanet(galacticObject)
             print(planet.name)
@@ -83,6 +83,31 @@ class commandLineInterface:
             print("Population: " + str(planet.population))
             print("Resource Production: " + str(planet.resources))
             print("Credit Production: " + str(planet.creditProduction))
+            if planet.owner == currentPlayer.side:
+                r = raw_input("Would you like to create something on this planet? (yes/no): ")
+                if r == "yes":
+                    stillBuying = True
+                    while stillBuying:
+                        print("Player credits: " + str(currentPlayer.credits))
+                        print("1) Squadron: " + self.table.galaxy.costFleet)
+                        print("2) Battalion: " + self.table.galaxy.costBattalion)
+                        r = raw_input("Number for your selection (0 exit): ")
+                        if r == "1":
+                            result = self.table.purchaseSquadron(currentPlayer, self.getNumPos(position))
+                            if result:
+                                print("Purchase successful!")
+                            else:
+                                print("Insufficient funds!")
+                        elif r == "2":
+                            result = self.table.purchaseBattalion(currentPlayer, self.getNumPos(position))
+                            if result:
+                                print("Purchase successful!")
+                            else:
+                                print("Insufficient funds!")
+                        elif r == "0":
+                            stillBuying = False
+                        
+                        
         else:
             fleet = self.table.getFleet(galacticObject)
             print(fleet.idVal)
@@ -198,6 +223,23 @@ class commandLineInterface:
                     else:
                         numLetter += 1
                 return currentMap[num-1][numLetter]
+        return "notASector"
+
+    def getNumPos(self, userInput):
+        currentMap = self.table.returnGalaxyMap() 
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        num = int(userInput[1:])
+        letter = userInput[0]
+        if num <= len(currentMap):
+            width = len(currentMap[0])
+            if letter in alphabet[:width]:
+                numLetter = 0
+                for char in alphabet:
+                    if char == letter:
+                        break
+                    else:
+                        numLetter += 1
+                return (num-1, numLetter)
         return "notASector"
         
     
