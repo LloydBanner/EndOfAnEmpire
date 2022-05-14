@@ -69,7 +69,11 @@ class PlayingTable:
             self.whoseTurn = self.galaxy.sides[nextTurn]
         else:
             self.whoseTurn = self.galaxy.sides[0]
-        return self.galaxy.getPlayer(returnSide)
+
+        player = self.galaxy.getPlayer(returnSide)
+        for fleet in player.fleets:
+            fleet.moved = False
+        return player
 
     def purchaseSquadron(self, player, position):
         if int(player.credits) >= int(self.galaxy.costFleet.strip("c")):
@@ -102,6 +106,12 @@ class PlayingTable:
             for fleet in player.fleets:
                 if fleet.idVal == fleetName:
                     player.fleets.remove(fleet)
+
+    def updateFleetPosition(self, fleetName, newXPos, newYPos):
+        fleet = self.getFleet(fleetName)
+        fleet.xPos = newXPos
+        fleet.yPos = newYPos
+        fleet.moved = True
         
         
         
@@ -320,6 +330,7 @@ class Fleet:
         self.side = side
         self.xPos = xPos
         self.yPos = yPos
+        self.moved = True
  
 
 #list of list of planet, each planet list is (planetName[0], position (x, y)[1], population[2], resources[3], owner[4], force[5], forceSide[6], support[7], creditProduction[8], climate[9])

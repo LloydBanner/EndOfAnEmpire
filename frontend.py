@@ -67,12 +67,15 @@ class commandLineInterface:
                                 contentSector = self.findSector(position)
                                 print(contentSector)
                                 r = raw_input("Type a number to select the thing in the sector or exit (0): ")
-                                num = int(r)
-                                if num != 0:
-                                    if num-1 < len(contentSector):
-                                        self.activate(contentSector[num-1], currentPlayer, position)
+                                if unicode(r, "utf-8").isdecimal():
+                                    num = int(r)
+                                    if num != 0:
+                                        if num-1 < len(contentSector):
+                                            self.activate(contentSector[num-1], currentPlayer, position)
+                                    else:
+                                        sectorSelection = False
                                 else:
-                                    sectorSelection = False         
+                                    print("Invalid selection")
             else:
                 print("AI turn")
 
@@ -117,6 +120,7 @@ class commandLineInterface:
             print("Number of squadrons: " + str(fleet.numSquadrons))
             print("Number of heros: " + str(fleet.numHeros))
             print("Number of infiltration teams: " + str(fleet.numInfiltration))
+            print("Moved this turn: " + str(fleet.moved))
             selection = True
             while selection:
                 r = raw_input("Combine this fleet with another in the sector? (yes/no): ")
@@ -139,6 +143,18 @@ class commandLineInterface:
                     selection = False
                 else:
                     print("Invalid selection")
+
+            if fleet.moved == False:
+                selection = True
+                while selection:
+                    r = raw_input("Move this fleet? (yes/no): ")
+                    if r == "yes":
+                        self.moveFleet(galacticObject)
+                        selection = False
+                    elif r == "no":
+                        selection = False
+                    else:
+                        print("Invalid selection")
             
 
     def selectOtherFleets(self, dontShow, player, pos):
@@ -223,7 +239,34 @@ class commandLineInterface:
             self.table.addPlayerFleet(fleetContent.side, fleetContent.xPos, fleetContent.yPos, battalions, squadrons, heros, infiltration)   
             print("Fleet Split")
             
+    def moveFleet(self, fleetName):
+        print("Fleet can move up to 5 sectors")
+        selecting = True
+        while selecting:
+            position = raw_input("Select a sector to move to: ")
+            contentSector = self.findSector(position)
+            if contentSector == "notASector":
+                print("Invalid Selection, please try again")
+            else:
+                newXYPos = self.getNumPos(position)
+                newXPos = newXYPos[0]
+                newYPos = newXYPos[1]
+                fleet = self.table.getFleet(fleetName)
+                xDiff = abs(newXPos-fleet.xPos)
+                yDiff = abs(newYPos-fleet.yPos)
+                totalDiff = xDiff + yDiff
+                if totalDiff == 0:
+                    print("Fleet holding same position")
+                    selecting = False
+                if totalDiff <= 5:
+                    self.table.updateFleetPosition(fleetName, newXPos, newYPos)
+                    print("Fleet moved")
+                    selecting = False
+                else:
+                    print("That's too far away")
+                        
                 
+            
                 
     def displayUserFriendlyMap(self, aMap):
         alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -253,7 +296,7 @@ class commandLineInterface:
                                 fleet = self.table.getFleet(fleetName)
                                 if firstOwner == "":
                                     firstOwner = fleet.side
-                                elif firstOwner != fleet:
+                                elif firstOwner != fleet.side:
                                     ownersEqual = False
 
                             if ownersEqual:
