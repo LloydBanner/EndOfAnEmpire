@@ -54,7 +54,7 @@ class commandLineInterface:
             endOfTurn = False
             if currentPlayer.isHuman == True:
                 while not endOfTurn:
-                    position = raw_input("Select a sector to where you would like to perform an action or end your turn (end): ")
+                    position = raw_input("Select a sector where you would like to perform an action or end your turn (end): ")
                     if position == "end":
                         endOfTurn = True
                     else:
@@ -62,9 +62,10 @@ class commandLineInterface:
                         if contentSector == "notASector":
                             print("Invalid Selection, please try again")
                         else:
-                            print(contentSector)
                             sectorSelection = True
                             while sectorSelection:
+                                contentSector = self.findSector(position)
+                                print(contentSector)
                                 r = raw_input("Type a number to select the thing in the sector or exit (0): ")
                                 num = int(r)
                                 if num != 0:
@@ -116,8 +117,113 @@ class commandLineInterface:
             print("Number of squadrons: " + str(fleet.numSquadrons))
             print("Number of heros: " + str(fleet.numHeros))
             print("Number of infiltration teams: " + str(fleet.numInfiltration))
+            selection = True
+            while selection:
+                r = raw_input("Combine this fleet with another in the sector? (yes/no): ")
+                if r == "yes":
+                    fleetSelection = self.selectOtherFleets(galacticObject, currentPlayer, position)
+                    if fleetSelection != "none":
+                        self.table.combineFleets(galacticObject, fleetSelection)
+                        print("Fleets combined")
+                elif r == "no":
+                    selection = False
+                else:
+                    print("Invalid selection")
+
+            selection = True
+            while selection:
+                r = raw_input("Split this fleet in to smaller fleets? (yes/no): ")
+                if r == "yes":
+                    self.splitFleet(galacticObject)
+                elif r == "no":
+                    selection = False
+                else:
+                    print("Invalid selection")
             
+
+    def selectOtherFleets(self, dontShow, player, pos):
+        selectionList = []
+        for galacticObject in self.findSector(pos):
+            if "Fleet" == galacticObject[0:5]:
+                if self.table.getFleet(galacticObject).side == player.side:
+                    if galacticObject != dontShow:
+                        selectionList += [galacticObject]
+        print(selectionList)
+        selecting = True
+        while selecting:
+            r = raw_input("Type a number to select the fleet you wish to combine with (0 to exit): ")
+            if r == "0":
+                print("Combination cancelled")
+                selecting = False
+                return "none"
+            elif int(r)-1 < len(selectionList):
+                return selectionList[int(r)-1]
+            else:
+                print("Invalid selection!")
+
+    def splitFleet(self, fleet):
+        fleetContent = self.table.getFleet(fleet)
+        battalions = 0
+        squadrons = 0
+        heros = 0
+        infiltration = 0
+        select = True
+        while select:
+            print("Battalions in current fleet = " + str(fleetContent.numBattalions))
+            r = raw_input("How many battalions would you like to move to the new fleet? ")
+            if int(r) <= fleetContent.numBattalions:
+                battalions = int(r)
+                select = False
+            else:
+                print("Invalid selection")
+
+        select = True
+        while select:
+            print("Squadrons in current fleet = " + str(fleetContent.numSquadrons))
+            r = raw_input("How many squadrons would you like to move to the new fleet? ")
+            if int(r) <= fleetContent.numSquadrons:
+                squadrons = int(r)
+                select = False
+            else:
+                print("Invalid selection")
+
+        select = True
+        while select:
+            print("Heros in current fleet = " + str(fleetContent.numHeros))
+            r = raw_input("How many heros would you like to move to the new fleet? ")
+            if int(r) <= fleetContent.numHeros:
+                heros = int(r)
+                select = False
+            else:
+                print("Invalid selection")
+
+        select = True
+        while select:
+            print("Infiltration teams in current fleet = " + str(fleetContent.numInfiltration))
+            r = raw_input("How many Infiltration teams would you like to move to the new fleet? ")
+            if int(r) <= fleetContent.numInfiltration:
+                infiltration = int(r)
+                select = False
+            else:
+                print("Invalid selection")
+
+        dontMake = False
+        if infiltration == fleetContent.numInfiltration:
+            if heros == fleetContent.numHeros:
+                if squadrons == fleetContent.numSquadrons:
+                    if battalions == fleetContent.numBattalions:
+                        dontMake = True
+                        print("No new fleet created, can't move all content of old fleet")
+
+        if dontMake != True:
+            fleetContent.numBattalions = fleetContent.numBattalions - battalions
+            fleetContent.numSquadrons = fleetContent.numSquadrons - squadrons
+            fleetContent.numInfiltration = fleetContent.numInfiltration - infiltration
+            fleetContent.numHeros = fleetContent.numHeros - heros
+            self.table.addPlayerFleet(fleetContent.side, fleetContent.xPos, fleetContent.yPos, battalions, squadrons, heros, infiltration)   
+            print("Fleet Split")
             
+                
                 
     def displayUserFriendlyMap(self, aMap):
         alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

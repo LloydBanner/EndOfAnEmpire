@@ -86,6 +86,23 @@ class PlayingTable:
             return True
         else:
             return False
+
+    def combineFleets(self, fleet1, fleet2):
+        fleet1Content = self.getFleet(fleet1)
+        fleet2Content = self.getFleet(fleet2)
+        fleet1Content.numBattalions += fleet2Content.numBattalions
+        fleet1Content.numSquadrons += fleet2Content.numSquadrons
+        fleet1Content.numHeros += fleet2Content.numHeros
+        fleet1Content.numInfiltration += fleet2Content.numInfiltration
+        self.removeFleet(fleet2)
+
+    def removeFleet(self, fleetName):
+        players = self.galaxy.players
+        for player in players:
+            for fleet in player.fleets:
+                if fleet.idVal == fleetName:
+                    player.fleets.remove(fleet)
+        
         
         
         
