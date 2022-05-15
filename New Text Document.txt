@@ -1,4 +1,0 @@
-self.table.reduceBattalionsInSector
-self.table.reduceSquadronsInSector
-self.comenceSpaceBattle
-self.comenceLandBattle
