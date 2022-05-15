@@ -1,5 +1,6 @@
 import backend
 import sys
+import os
 
 class commandLineInterface:
     def __init__(self):
@@ -10,8 +11,20 @@ class commandLineInterface:
         if choice == "new":
             side = self.chooseSide()
             self.table.createGame(side)
+            self.turnSequence()
+        elif choice == "load":
+            notSelected = True
+            while notSelected:
+                r = raw_input("load: ")
+                filesInSaves = os.listdir("saves/")
+                filename = r + ".pkl"
+                if filename in filesInSaves:
+                    self.table = self.table.loadState(r)
+                    notSelected = False
+                else:
+                    print("No save called: " + filename)
+            self.resumeGame()
 
-        self.turnSequence()
             
     def newGameOrLoad(self):
         answered = False
@@ -41,6 +54,52 @@ class commandLineInterface:
                 answered = True
                 return r
 
+    def resumeGame(self):
+        currentMap = self.table.returnGalaxyMap() 
+        self.displayUserFriendlyMap(currentMap)
+        currentPlayer = self.table.getCurrentPlayer()
+        endOfTurn = False
+        while not endOfTurn:
+            position = raw_input("Select a sector where you would like to perform an action or end your turn (end): ")
+            if position == "end":
+                endOfTurn = True
+            elif position == "save":
+                r = raw_input("Save as: ")
+                self.table.saveState(r)
+                print("Save successful!")
+            elif position == "load":
+                notSelected = True
+                while notSelected:
+                    r = raw_input("load: ")
+                    filesInSaves = os.listdir("saves/")
+                    filename = r + ".pkl"
+                    if filename in filesInSaves:
+                        self.table = self.table.loadState(r)
+                        notSelected = False
+                    else:
+                        print("No save called: " + filename)
+            else:
+                contentSector = self.findSector(position)
+                if contentSector == "notASector":
+                    print("Invalid Selection, please try again")
+                else:
+                    sectorSelection = True
+                    while sectorSelection:
+                        contentSector = self.findSector(position)
+                        print(contentSector)
+                        r = raw_input("Type a number to select the thing in the sector or exit (0): ")
+                        if unicode(r, "utf-8").isdecimal():
+                            num = int(r)
+                            if num != 0:
+                                if num-1 < len(contentSector):
+                                    self.activate(contentSector[num-1], currentPlayer, position)
+                            else:
+                                 sectorSelection = False
+                        else:
+                            print("Invalid selection")
+
+        self.turnSequence()
+    
     def turnSequence(self):
         self.table.addPlayerFleet("newRepublic", 1, 14, 1, 0, 0, 0) 
         self.table.addPlayerFleet("newRepublic", 20, 14, 1, 0, 0, 0) 
@@ -58,6 +117,24 @@ class commandLineInterface:
                     position = raw_input("Select a sector where you would like to perform an action or end your turn (end): ")
                     if position == "end":
                         endOfTurn = True
+                    elif position == "save":
+                        r = raw_input("Save as: ")
+                        self.table.saveState(r)
+                        print("Save successful!")
+                    elif position == "load":
+                        notSelected = True
+                        while notSelected:
+                            r = raw_input("load: ")
+                            filesInSaves = os.listdir("saves/")
+                            filename = r + ".pkl"
+                            if filename in filesInSaves:
+                                self.table = self.table.loadState(r)
+                                notSelected = False
+                            else:
+                                print("No save called: " + filename)
+                    elif position == "quit":
+                        endOfTurn = True
+                        playing = False
                     else:
                         contentSector = self.findSector(position)
                         if contentSector == "notASector":
@@ -447,7 +524,6 @@ class commandLineInterface:
                         firstOwner = ""
                         for fleetName in sector:
                             fleet = self.table.getFleet(fleetName)
-                            print(fleetName)
                             if firstOwner == "":
                                 firstOwner = fleet.side
                             elif firstOwner != fleet:

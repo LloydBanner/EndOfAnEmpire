@@ -10,17 +10,22 @@ class PlayingTable:
         loadMaps(self.galaxy, "Resources/Games")
         self.galaxy.readCosts("Resources")
         self.galaxy.readSides("Resources")
-
         
-
-        for y in self.galaxy.planets:
-            print(y.name)
-
         self.galaxy.updateGalaxyMap()
 
-        
-        for line in self.galaxy.galaxyMap:
-            print(line)
+    def saveState(self, filename):
+        filename = "saves/" + filename + ".pkl"
+        output = open(filename, "wb")
+        pickle.dump(self, output)
+        output.close()
+
+    @classmethod
+    def loadState(self, filename):
+        filename = "saves/" + filename + ".pkl"
+        inputFile = open(filename, "rb")
+        newState = pickle.load(inputFile)
+        inputFile.close()
+        return newState
 
     def returnSideOptions(self):
         return self.galaxy.sides
@@ -86,6 +91,23 @@ class PlayingTable:
                     
         
         return player
+
+    def getCurrentPlayer(self):
+        returnSide = ""
+        
+        nextSide = self.whoseTurn
+        currentTurn = 0
+        for side in self.galaxy.sides:
+            currentTurn += 1
+            if side == self.whoseTurn:
+                break
+        currentTurn = currentTurn - 1
+        if currentTurn < len(self.galaxy.sides):
+            returnSide = self.galaxy.sides[currentTurn]
+        else:
+            returnSide = self.galaxy.sides[0]
+
+        return self.galaxy.getPlayer(returnSide)
 
     def purchaseSquadron(self, player, position):
         if int(player.credits) >= int(self.galaxy.costFleet.strip("c")):
@@ -293,12 +315,9 @@ class Galaxy:
         
     def readSides(self, fileLocation):
         f = fileLocation + "/sides.txt"
-        print("location", f)
         if os.path.isfile(f):
-            print("is file")
             sidesFile = open(f, "r")
             for line in sidesFile.readlines():
-                print(line)
                 self.sides.append(line.strip(" ").strip("\n"))
 
     def updateGalaxyMap(self):
@@ -551,5 +570,4 @@ def loadMaps(galaxy, mapDirectory):
 
 
 
-table = PlayingTable()
 
