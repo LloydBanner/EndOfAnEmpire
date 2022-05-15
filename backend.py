@@ -1,6 +1,7 @@
 import pickle
 import uuid
 import os
+import random
 
 class PlayingTable:
     def __init__(self):
@@ -73,6 +74,17 @@ class PlayingTable:
         player = self.galaxy.getPlayer(returnSide)
         for fleet in player.fleets:
             fleet.moved = False
+
+        for planet in self.galaxy.planets:
+            if planet.owner == player.side:
+                if planet.creditProduction == "high":
+                    player.credits = int(player.credits) + 500
+                elif planet.creditProduction == "medium":
+                    player.credits = int(player.credits) + 250
+                elif planet.creditProduction == "low":
+                    player.credits = int(player.credits) + 125
+                    
+        
         return player
 
     def purchaseSquadron(self, player, position):
@@ -98,6 +110,7 @@ class PlayingTable:
         fleet1Content.numSquadrons += fleet2Content.numSquadrons
         fleet1Content.numHeros += fleet2Content.numHeros
         fleet1Content.numInfiltration += fleet2Content.numInfiltration
+        fleet1Content.moved = True
         self.removeFleet(fleet2)
 
     def removeFleet(self, fleetName):
@@ -112,6 +125,92 @@ class PlayingTable:
         fleet.xPos = newXPos
         fleet.yPos = newYPos
         fleet.moved = True
+
+    def convertPlanet(self, planetName, newSide):
+        for planet in self.galaxy.planets:
+            if planet.name == planetName:
+                planet.owner = newSide
+                break
+
+    def reduceSquadronsInSector(self, side, xPos, yPos, reduceBy):
+        for player in self.galaxy.players:
+            if player.side == side:
+                for fleet in player.fleets:
+                    if fleet.xPos == xPos:
+                        if fleet.yPos == yPos:
+                            initialNum = fleet.numSquadrons
+                            for reduction in range(initialNum):
+                                if reduceBy > 0:
+                                    fleet.numSquadrons = fleet.numSquadrons - 1
+                                    reduceBy = reduceBy - 1
+                            if fleet.numSquadrons == 0:
+                                if fleet.numBattalions == 0:
+                                    if fleet.numHeros == 0:
+                                        if fleet.numInfiltration == 0:
+                                            self.removeFleet(fleet.idVal)
+                            if reduceBy == 0:
+                                return
+
+    def reduceBattalionsInSector(self, side, xPos, yPos, reduceBy):
+        for player in self.galaxy.players:
+            if player.side == side:
+                for fleet in player.fleets:
+                    if fleet.xPos == xPos:
+                        if fleet.yPos == yPos:
+                            initialNum = fleet.numBattalions
+                            for reduction in range(initialNum):
+                                if reduceBy > 0:
+                                    fleet.numBattalions = fleet.numBattalions - 1
+                                    reduceBy = reduceBy - 1
+                            if fleet.numSquadrons == 0:
+                                if fleet.numBattalions == 0:
+                                    if fleet.numHeros == 0:
+                                        if fleet.numInfiltration == 0:
+                                            self.removeFleet(fleet.idVal)
+                            if reduceBy == 0:
+                                return
+
+    def removeBattalionsInSector(self, side, xPos, yPos):
+        for player in self.galaxy.players:
+            if player.side == side:
+                for fleet in player.fleets:
+                    if fleet.xPos == xPos:
+                        if fleet.yPos == yPos:
+                            fleet.numBattalions = 0
+                            if fleet.numSquadrons == 0:
+                                if fleet.numBattalions == 0:
+                                    if fleet.numHeros == 0:
+                                        if fleet.numInfiltration == 0:
+                                            self.removeFleet(fleet.idVal)
+
+    def returnSpaceBattle(self):
+        for climate in self.galaxy.climates:
+            if climate.name == "ClimateShip":
+                selector = random.SystemRandom()
+                mapToPlay = selector.choice(climate.mapsSpace)
+                return [mapToPlay[0], mapToPlay[1][0], mapToPlay[-1]]
+
+    def returnLandBattle(self, planetName):
+        planetClimate = "none"
+        mapsToSelectFrom = []
+        for planet in self.galaxy.planets:
+            if planet.name == planetName:
+                mapsToSelectFrom = planet.mapsLand
+                planetClimate = planet.climate
+
+        for climate in self.galaxy.climates:
+            if climate.name == planetClimate:
+                mapsToSelectFrom = mapsToSelectFrom + climate.mapsLand
+
+        selector = random.SystemRandom()
+        mapToPlay = selector.choice(mapsToSelectFrom)
+
+        gamemodes = mapToPlay[1]
+        gamemode = selector.choice(gamemodes)    
+        
+        return (mapToPlay[0], gamemode, mapToPlay[-1])
+                
+        
         
         
         
@@ -412,7 +511,7 @@ def loadMaps(galaxy, mapDirectory):
                         mapsList[-1] = mapsList[-1].strip(" ").strip(")\n")
                         for battleMap in mapsList:
                             mapElements = battleMap.split(", ")
-                            newMap = Map(mapElements[0], mapElements[1:], filename.split(".")[0])
+                            newMap = [mapElements[0], mapElements[1:], filename.split(".")[0]]
                             mapsLand.append(newMap)
                     elif "mapsInfiltrate: " == line[0:16]:
                         maps = line.split(": ")[1]
@@ -422,7 +521,7 @@ def loadMaps(galaxy, mapDirectory):
                         mapsList[-1] = mapsList[-1].strip(" ").strip(")\n")
                         for battleMap in mapsList:
                             mapElements = battleMap.split(", ")
-                            newMap = Map(mapElements[0], mapElements[1:], filename.split(".")[0])
+                            newMap = [mapElements[0], mapElements[1:], filename.split(".")[0]]
                             mapsInfiltrate.append(newMap)
                     elif "mapsSpaceInfiltrate: " == line[0:22]:
                         maps = line.split(": ")[1]
@@ -432,7 +531,7 @@ def loadMaps(galaxy, mapDirectory):
                         mapsList[-1] = mapsList[-1].strip(" ").strip(")\n")
                         for battleMap in mapsList:
                             mapElements = battleMap.split(", ")
-                            newMap = Map(mapElements[0], mapElements[1:], filename.split(".")[0])
+                            newMap = [mapElements[0], mapElements[1:], filename.split(".")[0]]
                             mapsSpaceInfiltrate.append(newMap)
                     elif "mapsSpace: " == line[0:11]:
                         maps = line.split(": ")[1]
@@ -442,7 +541,7 @@ def loadMaps(galaxy, mapDirectory):
                         mapsList[-1] = mapsList[-1].strip(" ").strip(")\n")
                         for battleMap in mapsList:
                             mapElements = battleMap.split(", ")
-                            newMap = Map(mapElements[0], mapElements[1:], filename.split(".")[0])
+                            newMap = [mapElements[0], mapElements[1:], filename.split(".")[0]]
                             mapsSpace.append(newMap)
                             
                         

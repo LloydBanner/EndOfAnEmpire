@@ -42,10 +42,11 @@ class commandLineInterface:
                 return r
 
     def turnSequence(self):
-        self.table.addPlayerFleet("empire", 1, 14, 1, 0, 0, 0) 
+        self.table.addPlayerFleet("newRepublic", 1, 14, 1, 0, 0, 0) 
         self.table.addPlayerFleet("newRepublic", 20, 14, 1, 0, 0, 0) 
-        self.table.addPlayerFleet("empire", 12, 12, 1, 0, 0, 0) 
-        self.table.addPlayerFleet("empire", 10, 16, 1, 0, 0, 0)
+        self.table.addPlayerFleet("newRepublic", 12, 12, 1, 0, 0, 0) 
+        self.table.addPlayerFleet("newRepublic", 10, 16, 1, 0, 0, 0)
+        self.table.addPlayerFleet("newRepublic", 22, 15, 1, 2, 0, 0)
         playing = True
         while playing:
             currentMap = self.table.returnGalaxyMap() 
@@ -261,11 +262,149 @@ class commandLineInterface:
                 if totalDiff <= 5:
                     self.table.updateFleetPosition(fleetName, newXPos, newYPos)
                     print("Fleet moved")
+                    conflict = self.checkForConflict(newXPos, newYPos, position)
                     selecting = False
                 else:
                     print("That's too far away")
                         
-                
+
+    def checkForConflict(self, newXPos, newYPos, position):
+        contentSector = self.findSector(position)
+        planetSide = "NOPLANET"
+        conflictedPlanet = "NOPLANET" 
+        firstSide = "none"
+        conflictingSides = False
+        for galacticObject in contentSector:
+            if "Planet" == galacticObject[0:6]:
+                planetSide = self.table.getPlanetOwner(galacticObject)
+                conflictedPlanet = galacticObject
+            elif "Fleet" == galacticObject[0:5]:
+                if firstSide == "none":
+                    firstSide = self.table.getFleet(galacticObject).side
+                elif firstSide != self.table.getFleet(galacticObject).side:
+                    conflictingSides = True
+
+        if conflictingSides:
+            side1Battalions = 0
+            side1Squadrons = 0
+            side1Heros = 0
+            side1Infiltration = 0
+            side2Battalions = 0
+            side2Squadrons = 0
+            side2Heros = 0
+            side2Infiltration = 0
+            side1 = "NOSIDE"
+            side2 = "NOSIDE"
+            conflictProgress = False
+            for galacticObject in contentSector:
+                if "Fleet" == galacticObject[0:5]:
+                    fleetContent = self.table.getFleet(galacticObject)
+                    if side1 == "NOSIDE":
+                        side1 = fleetContent.side
+                    elif side2 == "NOSIDE":
+                        if fleetContent.side != side1:
+                            side2 = fleetContent.side
+
+                    if side1 == fleetContent.side:
+                        side1Battalions = side1Battalions + fleetContent.numBattalions
+                        side1Squadrons = side1Squadrons + fleetContent.numSquadrons
+                        side1Heros = side1Heros + fleetContent.numHeros
+                        side1Infiltration = side1Infiltration + fleetContent.numInfiltration
+                    else:
+                        side2Battalions = side2Battalions + fleetContent.numBattalions
+                        side2Squadrons = side2Squadrons + fleetContent.numSquadrons
+                        side2Heros = side2Heros + fleetContent.numHeros
+                        side2Infiltration = side2Infiltration + fleetContent.numInfiltration
+
+            if side1Squadrons > 0:
+                if side2Squadrons > 0:
+                    victor = self.comenceSpaceBattle(side1, side2)
+                    if victor == side1:
+                        self.table.reduceSquadronsInSector(side2, newXPos, newYPos, 1)
+                        print(side2 + " lost a squadron")
+                    else:
+                        self.table.reduceSquadronsInSector(side1, newXPos, newYPos, 1)
+                        print(side1 + " lost a squadron")
+                    conflictProgress = True
+                elif planetSide != side2:
+                    self.table.removeBattalionsInSector(side2, newXPos, newYPos)
+                    print(side2 + " lost " + str(side2Battalions) + " Battalions due to lack of squadron support")
+                    side2Battalions = 0
+                    conflictProgress = True
+            elif side2Squadrons > 0:
+                if planetSide != side1:
+                    self.table.removeBattalionsInSector(side1, newXPos, newYPos)
+                    print(side1 + " lost " + str(side1Battalions) + " Battalions due to lack of squadron support")
+                    side1Battalions = 0
+                    conflictProgress = True
+
+            if conflictedPlanet != "NOPLANET":
+                if side1Battalions > 0:
+                    if side2Battalions > 0:
+                        if planetSide == side1:
+                            if side1Squadrons == 0:
+                                victor = self.comenceLandBattle(conflictedPlanet, side1, side2)
+                                if victor == side1:
+                                    self.table.reduceBattalionsInSector(side2, newXPos, newYPos, 1)
+                                    print(side2 + " lost a battalion")
+                                    conflictProgress = True
+                                else:
+                                    self.table.reduceBattalionsInSector(side1, newXPos, newYPos, 1)
+                                    print(side1 + " lost a battalion")
+                                    conflictProgress = True
+                        elif planetSide == side2:
+                            if side2Squadrons == 0:
+                                victor = self.comenceLandBattle(conflictedPlanet, side1, side2)
+                                if victor == side1:
+                                    self.table.reduceBattalionsInSector(side2, newXPos, newYPos, 1)
+                                    print(side2 + " lost a battalion")
+                                    conflictProgress = True
+                                else:
+                                    self.table.reduceBattalionsInSector(side1, newXPos, newYPos, 1)
+                                    print(side1 + " lost a battalion")
+                                    conflictProgress = True
+            
+                        
+            if conflictProgress:
+                self.checkForConflict(newXPos, newYPos, position)
+                    
+                    
+        elif planetSide != "NOPLANET":
+            convertTo = self.table.getFleet(contentSector[1]).side
+            if planetSide != convertTo:
+                self.table.convertPlanet(conflictedPlanet, convertTo)
+                print("Captured " + conflictedPlanet + " for the " + convertTo)
+            
+            
+    def comenceSpaceBattle(self, side1, side2):
+        #gamemode, map, game
+        mapToPlay = self.table.returnSpaceBattle()
+        print("Play " + mapToPlay[1] + " on " + mapToPlay[0] + " in " + mapToPlay[-1])
+        selecting = True
+        while selecting:
+            r = raw_input("Which side won? ")
+            if r == side1:
+                return side1
+            elif r == side2:
+                return side2
+            else:
+                print("That side was not in the conflict")
+
+    def comenceLandBattle(self, planet, side1, side2):
+        #gamemode, map, game
+        mapToPlay = self.table.returnLandBattle(planet)
+        print("Play " + mapToPlay[1] + " on " + mapToPlay[0] + " in " + mapToPlay[-1])
+        selecting = True
+        while selecting:
+            r = raw_input("Which side won? ")
+            if r == side1:
+                return side1
+            elif r == side2:
+                return side2
+            else:
+                print("That side was not in the conflict")
+        
+        
             
                 
     def displayUserFriendlyMap(self, aMap):
