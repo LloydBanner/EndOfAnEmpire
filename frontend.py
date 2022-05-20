@@ -101,11 +101,6 @@ class commandLineInterface:
         self.turnSequence()
     
     def turnSequence(self):
-        self.table.addPlayerFleet("newRepublic", 1, 14, 1, 0, 0, 0) 
-        self.table.addPlayerFleet("newRepublic", 20, 14, 1, 0, 0, 0) 
-        self.table.addPlayerFleet("newRepublic", 12, 12, 1, 0, 0, 0) 
-        self.table.addPlayerFleet("newRepublic", 10, 16, 1, 0, 0, 0)
-        self.table.addPlayerFleet("newRepublic", 22, 15, 1, 2, 0, 0)
         playing = True
         while playing:
             currentMap = self.table.returnGalaxyMap() 
@@ -155,8 +150,47 @@ class commandLineInterface:
                                 else:
                                     print("Invalid selection")
             else:
-                print("AI turn")
+                print("AI turn: " + currentPlayer.side)
+                while not endOfTurn:
+                    self.doAIMove(currentPlayer, currentMap)
+                    endOfTurn = True
 
+    def doAIMove(self, currentPlayer, galaxyMap):
+        for planet in self.table.galaxy.planets:
+            if planet.owner == currentPlayer.side:
+                planetSector = galaxyMap[planet.xPos][planet.yPos]
+                noBattalions = True
+                for galacticObject in planetSector:
+                    print(galacticObject)
+                    if "Fleet" == galacticObject[0:5]:
+                        fleet = self.table.getFleet(galacticObject)
+                        if fleet.side == currentPlayer.side:
+                            print("Fleet has battalions; " + str(fleet.numBattalions))
+                            if int(fleet.numBattalions) > 0:
+                                print("already battalion")
+                                noBattalions = False
+                print(noBattalions)
+                if noBattalions:
+                    result = self.table.purchaseBattalion(currentPlayer, (planet.xPos, planet.yPos))
+                    if result == True:
+                        print("The " + currentPlayer.side + " purchased a battalion on " + planet.name)
+           
+        for planet in self.table.galaxy.planets:
+            if planet.owner == currentPlayer.side:
+                planetSector = galaxyMap[planet.xPos][planet.yPos]
+                noSquadrons = True
+                for galacticObject in planetSector:
+                    if "Fleet" == galacticObject[0:5]:
+                        fleet = self.table.getFleet(galacticObject)
+                        if fleet.side == currentPlayer.side:
+                            if int(fleet.numSquadrons) > 0:
+                                noSquadrons = False
+                if noSquadrons:
+                    result = self.table.purchaseSquadron(currentPlayer, (planet.xPos, planet.yPos))
+                    if result == True:
+                        print("The " + currentPlayer.side + " purchased a squadron on " + planet.name)
+                        self.checkForConflict(planet.xPos, planet.yPos, (planet.xPos, planet.yPos))
+                                    
     def activate(self, galacticObject, currentPlayer, position):
         if galacticObject[0:6] == "Planet":
             planet = self.table.galaxy.getPlanet(galacticObject)
@@ -199,7 +233,12 @@ class commandLineInterface:
             print("Number of heros: " + str(fleet.numHeros))
             print("Number of infiltration teams: " + str(fleet.numInfiltration))
             print("Moved this turn: " + str(fleet.moved))
-            selection = True
+
+            ownedByPlayer = False
+            if fleet.side == currentPlayer.side:
+                ownedByPlayer = True
+                
+            selection = ownedByPlayer
             while selection:
                 r = raw_input("Combine this fleet with another in the sector? (yes/no): ")
                 if r == "yes":
@@ -212,7 +251,7 @@ class commandLineInterface:
                 else:
                     print("Invalid selection")
 
-            selection = True
+            selection = ownedByPlayer
             while selection:
                 r = raw_input("Split this fleet in to smaller fleets? (yes/no): ")
                 if r == "yes":
@@ -222,7 +261,7 @@ class commandLineInterface:
                 else:
                     print("Invalid selection")
 
-            if fleet.moved == False:
+            if fleet.moved == False and ownedByPlayer:
                 selection = True
                 while selection:
                     r = raw_input("Move this fleet? (yes/no): ")
@@ -574,8 +613,14 @@ class commandLineInterface:
 
     def findSector(self, userInput):
         currentMap = self.table.returnGalaxyMap() 
+        if isinstance(userInput, basestring) == False:
+            return currentMap[userInput[0]][userInput[1]]
         alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        num = int(userInput[1:])
+        num = 0
+        if userInput[1:] != '' and userInput[1:].isdigit():
+            num = int(userInput[1:])
+        else:
+            return "notASector"
         letter = userInput[0]
         if num <= len(currentMap):
             width = len(currentMap[0])
