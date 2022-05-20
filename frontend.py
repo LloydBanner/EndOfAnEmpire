@@ -190,7 +190,172 @@ class commandLineInterface:
                     if result == True:
                         print("The " + currentPlayer.side + " purchased a squadron on " + planet.name)
                         self.checkForConflict(planet.xPos, planet.yPos, (planet.xPos, planet.yPos))
-                                    
+
+        tryMove = False
+        initialFleets = currentPlayer.fleets
+        for fleet in initialFleets:
+            fleetSector = galaxyMap[fleet.xPos][fleet.yPos]
+            possiblePlanet = fleetSector[0]
+            if possiblePlanet[0:6] == "Planet":
+                if self.table.getPlanetOwner(possiblePlanet) == fleet.side:
+                    if self.isPlanetSafe(possiblePlanet):
+                        if fleet.moved == False:
+                            tryMove = True
+            else:
+                if fleet.moved == False:
+                    tryMove = True
+
+            if tryMove:
+                moved = self.attackUndefened(fleet)
+                if not moved:
+                    moved = self.moveToUnclaimedPlanet(fleet)
+                if not moved:
+                    moved = self.moveToEnemyPlanet(fleet)
+
+
+        initialFleets = currentPlayer.fleets
+        for fleet in initialFleets:
+            self.combineWithFleetsInSector(fleet)
+                        
+    def isPlanetSafe(self, planetName):
+        planet = self.table.galaxy.getPlanet(planetName)
+        xPos = planet.xPos
+        yPos = planet.yPos
+        threats = self.getEnemyFleetsThatCanReach(planet.owner, xPos, yPos)
+        if threats == []:
+            return True
+        else:
+            for fleetName in threats:
+                fleet = self.table.getFleet(fleetName)
+                if fleet.numBattalions > 0:
+                    return False
+                elif fleet.numSquadrons > 0:
+                    return False
+            return True
+
+    def attackUndefened(self, fleet):
+        if fleet.numSquadrons > 0:
+            enemyFleets = getEnemyFleetsThatCanReach(fleet.side, fleet.xPos, fleet,yPos)
+            for enemy in enemyFleets:
+                content = self.table.getFleet(enemy)
+                if content.numSquadrons == 0:
+                    if content.numBattalions > 0:
+                        self.table.updateFleetPosition(fleet.idVal, content.xPos, content.yPos)
+                        print(fleet.side + "moved fleet")
+                        self.checkForConflict(content.xPos, content.yPos (content.xPos, content.yPos))
+                        return True
+        return False
+                    
+    def moveToUnclaimedPlanet(self, fleet):
+        unclaimedPlanets = []
+        for planet in self.table.galaxy.planets:
+            if planet.owner == "none":
+                unclaimedPlanets = unclaimedPlanets + [planet]
+        
+        lowestDiff = 10000
+        targetPlanet = "none"
+        for planet in unclaimedPlanets:
+                xDiff = abs(planet.xPos-fleet.xPos)
+                yDiff = abs(planet.yPos-fleet.yPos)
+                totalDiff = xDiff + yDiff
+                if totalDiff < lowestDiff:
+                    targetPlanet = planet
+                    lowestDiff = totalDiff
+        if targetPlanet != "none":
+            return self.moveToward(fleet, targetPlanet.xPos, targetPlanet.yPos)
+        else:
+            return False
+        
+    def moveToEnemyPlanet(self, fleet):
+        enemyPlanets = []
+        for planet in self.table.galaxy.planets:
+            if planet.owner != "none":
+                if planet.owner != fleet.side:
+                    enemyPlanets = enemyPlanets + [planet]
+
+        lowestDiff = 10000
+        targetPlanet = "none"
+        for planet in enemyPlanets:
+                xDiff = abs(planet.xPos-fleet.xPos)
+                yDiff = abs(planet.yPos-fleet.yPos)
+                totalDiff = xDiff + yDiff
+                if totalDiff < lowestDiff:
+                    targetPlanet = planet
+                    lowestDiff = totalDiff
+
+        if targetPlanet != "none":
+            return self.moveToward(fleet, targetPlanet.xPos, targetPlanet.yPos)
+        else:
+            return False
+                    
+    def moveToward(self, fleet, xPos, yPos):
+        newXPos = fleet.xPos
+        newYPos = fleet.yPos
+        
+        xDiff = abs(xPos-fleet.xPos)
+        yDiff = abs(yPos-fleet.yPos)
+        totalDiff = xDiff + yDiff
+        if totalDiff <= fleet.moveRange:
+            self.table.updateFleetPosition(fleet.idVal, xPos, yPos)
+            self.checkForConflict(xPos, yPos, (xPos, yPos))
+            return True
+        else:
+            for i in range(fleet.moveRange):
+                xDiff = fleet.xPos-xPos
+                yDiff = fleet.yPos-yPos
+                if abs(xDiff) >= abs(yDiff):
+                    if xDiff > 0:
+                        newXPos = newXPos - 1
+                    elif xDiff < 0:
+                        newXPos = newXPos + 1
+                else:
+                    if yDiff > 0:
+                        newYPos = newYPos - 1
+                    elif yDiff < 0:
+                        newYPos = newYPos + 1
+            dontMove = False
+            if fleet.numSquadrons == 0:
+                threats = self.getEnemyFleetsThatCanReach(fleet.side, newXPos, newYPos)
+                for enemy in threats:
+                    enemyFleet = self.table.getFleet(enemy)
+                    if enemyFleet.numSquadrons > 0:
+                        if fleet.numBattalions > 0:
+                            dontMove = True
+
+            if dontMove == False:
+                self.table.updateFleetPosition(fleet.idVal, newXPos, newYPos)
+                self.checkForConflict(newXPos, newYPos, (newXPos, newYPos))
+                return True
+        return False
+
+    def combineWithFleetsInSector(self, fleet):
+        sector = self.findSector((fleet.xPos, fleet.yPos))
+        for galacticObject in sector:
+            if galacticObject[0:5] == "Fleet":
+                if self.table.getFleet(galacticObject).side == fleet.side:
+                    if galacticObject != fleet.idVal:
+                        self.table.combineFleets(fleet.idVal, galacticObject)
+                
+
+    def getEnemyFleetsThatCanReach(self, side, xPos, yPos):
+        galaxyMap = self.table.returnGalaxyMap()
+        threats = []
+        for x in range(xPos-5, xPos+5):
+            if x >= 0 and x < len(galaxyMap):
+                for y in range(yPos-5, yPos+5):
+                    if y >= 0 and y < len(galaxyMap):
+                        xDiff = abs(xPos-x)
+                        yDiff = abs(yPos-y)
+                        totalDiff = xDiff + yDiff
+                        if totalDiff <= 5:
+                            sector = galaxyMap[x][y]
+                            for galacticObject in sector:
+                                if galacticObject[0:5] == "Fleet":
+                                    if self.table.getFleet(galacticObject).side != side:
+                                        threats = threats + [galacticObject]
+        return threats
+                
+                  
     def activate(self, galacticObject, currentPlayer, position):
         if galacticObject[0:6] == "Planet":
             planet = self.table.galaxy.getPlanet(galacticObject)

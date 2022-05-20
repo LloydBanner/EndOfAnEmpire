@@ -449,6 +449,7 @@ class Fleet:
         self.xPos = xPos
         self.yPos = yPos
         self.moved = True
+        self.moveRange = 5
  
 
 #list of list of planet, each planet list is (planetName[0], position (x, y)[1], population[2], resources[3], owner[4], force[5], forceSide[6], support[7], creditProduction[8], climate[9])
