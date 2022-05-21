@@ -101,7 +101,6 @@ class PlayingTable:
             currentTurn += 1
             if side == self.whoseTurn:
                 break
-        currentTurn = currentTurn - 1
         if currentTurn < len(self.galaxy.sides):
             returnSide = self.galaxy.sides[currentTurn]
         else:
