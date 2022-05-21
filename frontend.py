@@ -1,6 +1,7 @@
 import backend
 import sys
 import os
+import random
 
 class commandLineInterface:
     def __init__(self):
@@ -161,23 +162,11 @@ class commandLineInterface:
                 planetSector = galaxyMap[planet.xPos][planet.yPos]
                 noBattalions = True
                 for galacticObject in planetSector:
-                    print(galacticObject)
                     if "Fleet" == galacticObject[0:5]:
                         fleet = self.table.getFleet(galacticObject)
                         if fleet.side == currentPlayer.side:
-                            print("Fleet has battalions; " + str(fleet.numBattalions))
                             if int(fleet.numBattalions) > 0:
-                                print("already battalion")
                                 noBattalions = False
-                print(noBattalions)
-                if noBattalions:
-                    result = self.table.purchaseBattalion(currentPlayer, (planet.xPos, planet.yPos))
-                    if result == True:
-                        print("The " + currentPlayer.side + " purchased a battalion on " + planet.name)
-           
-        for planet in self.table.galaxy.planets:
-            if planet.owner == currentPlayer.side:
-                planetSector = galaxyMap[planet.xPos][planet.yPos]
                 noSquadrons = True
                 for galacticObject in planetSector:
                     if "Fleet" == galacticObject[0:5]:
@@ -185,12 +174,29 @@ class commandLineInterface:
                         if fleet.side == currentPlayer.side:
                             if int(fleet.numSquadrons) > 0:
                                 noSquadrons = False
-                if noSquadrons:
+                if noBattalions and noSquadrons:
+                    options = ["battalion", "squadron"]
+                    random.shuffle(options)
+                    if options[0] == "battalion":
+                        result = self.table.purchaseBattalion(currentPlayer, (planet.xPos, planet.yPos))
+                        if result == True:
+                            print("The " + currentPlayer.side + " purchased a battalion on " + planet.name)
+                    elif options[0] == "squadron":
+                        result = self.table.purchaseSquadron(currentPlayer, (planet.xPos, planet.yPos))
+                        if result == True:
+                            print("The " + currentPlayer.side + " purchased a Squadron on " + planet.name)
+                elif noBattalions:
+                    result = self.table.purchaseBattalion(currentPlayer, (planet.xPos, planet.yPos))
+                    if result == True:
+                        print("The " + currentPlayer.side + " purchased a battalion on " + planet.name)
+                elif noSquadrons:
                     result = self.table.purchaseSquadron(currentPlayer, (planet.xPos, planet.yPos))
                     if result == True:
                         print("The " + currentPlayer.side + " purchased a squadron on " + planet.name)
-                        self.checkForConflict(planet.xPos, planet.yPos, (planet.xPos, planet.yPos))
-
+                    
+                    
+                        
+           
         tryMove = False
         initialFleets = currentPlayer.fleets
         for fleet in initialFleets:
@@ -207,15 +213,29 @@ class commandLineInterface:
 
             if tryMove:
                 moved = self.attackUndefened(fleet)
-                if not moved:
-                    moved = self.moveToUnclaimedPlanet(fleet)
-                if not moved:
-                    moved = self.moveToEnemyPlanet(fleet)
+                shuffledList = ["unclaimed", "claimed", "Attack"]
+                random.shuffle(shuffledList)
+                for option in shuffledList:
+                    if not moved:
+                        if option == "unclaimed":
+                            moved = self.moveToUnclaimedPlanet(fleet)
+                        elif option == "claimed": 
+                            moved = self.moveToEnemyPlanet(fleet)
+                        elif option == "attack":
+                            moved = self.attackIfFair(fleet)
+                    else:
+                        break
 
 
         initialFleets = currentPlayer.fleets
         for fleet in initialFleets:
             self.combineWithFleetsInSector(fleet)
+
+    def convertToGridRef(self, xPos, yPos):
+        alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        letter = alphabet[xPos]
+        num = yPos + 1
+        return letter + str(num)
                         
     def isPlanetSafe(self, planetName):
         planet = self.table.galaxy.getPlanet(planetName)
@@ -235,14 +255,18 @@ class commandLineInterface:
 
     def attackUndefened(self, fleet):
         if fleet.numSquadrons > 0:
-            enemyFleets = getEnemyFleetsThatCanReach(fleet.side, fleet.xPos, fleet,yPos)
+            enemyFleets = self.getEnemyFleetsThatCanReach(fleet.side, fleet.xPos, fleet.yPos)
             for enemy in enemyFleets:
                 content = self.table.getFleet(enemy)
-                if content.numSquadrons == 0:
-                    if content.numBattalions > 0:
+                enemySquadrons = self.table.getSquadronsEnemyInSector(fleet.side, content.xPos, content.yPos)
+                enemyBattalions = self.table.getBattalionsEnemyInSector(fleet.side, content.xPos, content.yPos)
+                if enemySquadrons == 0:
+                    if enemyBattalions > 0:
+                        oldGrid = self.convertToGridRef(fleet.xPos, fleet.yPos)
                         self.table.updateFleetPosition(fleet.idVal, content.xPos, content.yPos)
-                        print(fleet.side + "moved fleet")
-                        self.checkForConflict(content.xPos, content.yPos (content.xPos, content.yPos))
+                        newGrid = self.convertToGridRef(content.xPos, content.yPos)
+                        print("The " + fleet.side + " moved fleet from " + oldGrid + " to " + newGrid)
+                        self.checkForConflict(content.xPos, content.yPos, (content.xPos, content.yPos))
                         return True
         return False
                     
@@ -287,6 +311,32 @@ class commandLineInterface:
             return self.moveToward(fleet, targetPlanet.xPos, targetPlanet.yPos)
         else:
             return False
+
+    def attackIfFair(self, fleet):
+        enemyFleets = getEnemyFleetsThatCanReach(fleet.side, fleet.xPos, fleet,yPos)
+        for enemy in enemyFleets:
+                content = self.table.getFleet(enemy)
+                enemySquadrons = self.table.getSquadronsEnemyInSector(fleet.side, content.xPos, content.yPos)
+                enemyBattalions = self.table.getBattalionsEnemyInSector(fleet.side, content.xPos, content.yPos)
+                if enemySquadrons > 0:
+                    if fleet.numSquadrons > 0:
+                        oldGrid = self.convertToGridRef(fleet.xPos, fleet.yPos)
+                        self.table.updateFleetPosition(fleet.idVal, content.xPos, content.yPos)
+                        newGrid = self.convertToGridRef(content.xPos, content.yPos)
+                        print("The " + fleet.side + " moved fleet from " + oldGrid + " to " + newGrid)
+                        self.checkForConflict(content.xPos, content.yPos (content.xPos, content.yPos))
+                        return True
+                if enemyBattalions > 0:
+                    sector = self.findSector((content.xPos, content.yPos))
+                    if sector[0][0:6] == "Planet":
+                        if fleet.numBattalions > 0:
+                            oldGrid = self.convertToGridRef(fleet.xPos, fleet.yPos)
+                            self.table.updateFleetPosition(fleet.idVal, content.xPos, content.yPos)
+                            newGrid = self.convertToGridRef(content.xPos, content.yPos)
+                            print("The " + fleet.side + " moved fleet from " + oldGrid + " to " + newGrid)
+                            self.checkForConflict(content.xPos, content.yPos (content.xPos, content.yPos))
+                            return True
+        return False
                     
     def moveToward(self, fleet, xPos, yPos):
         newXPos = fleet.xPos
@@ -296,9 +346,23 @@ class commandLineInterface:
         yDiff = abs(yPos-fleet.yPos)
         totalDiff = xDiff + yDiff
         if totalDiff <= fleet.moveRange:
-            self.table.updateFleetPosition(fleet.idVal, xPos, yPos)
-            self.checkForConflict(xPos, yPos, (xPos, yPos))
-            return True
+            dontMove = False
+            if fleet.numSquadrons == 0:
+                threats = self.getEnemyFleetsThatCanReach(fleet.side, newXPos, newYPos)
+                for enemy in threats:
+                    enemyFleet = self.table.getFleet(enemy)
+                    if enemyFleet.numSquadrons > 0:
+                        if not self.isPlanetUndefended(xPos, yPos):
+                            if fleet.numBattalions > 0 and fleet.numSquadrons < 1:
+                                dontMove = True
+
+            if dontMove == False:
+                oldGrid = self.convertToGridRef(fleet.xPos, fleet.yPos)
+                self.table.updateFleetPosition(fleet.idVal, xPos, yPos)
+                newGrid = self.convertToGridRef(xPos, yPos)
+                print("The " + fleet.side + " moved fleet from " + oldGrid + " to " + newGrid)       
+                self.checkForConflict(xPos, yPos, (xPos, yPos))
+                return True
         else:
             for i in range(fleet.moveRange):
                 xDiff = fleet.xPos-xPos
@@ -323,10 +387,23 @@ class commandLineInterface:
                             dontMove = True
 
             if dontMove == False:
+                oldGrid = self.convertToGridRef(fleet.xPos, fleet.yPos)
                 self.table.updateFleetPosition(fleet.idVal, newXPos, newYPos)
+                newGrid = self.convertToGridRef(newXPos, newYPos)
+                print("The " + fleet.side + " moved fleet from " + oldGrid + " to " + newGrid)       
                 self.checkForConflict(newXPos, newYPos, (newXPos, newYPos))
                 return True
         return False
+
+    def isPlanetUndefended(self, xPos, yPos):
+        sector = self.findSector((xPos, yPos))
+        if sector[0][0:6] == "Planet":
+            for galacticObject in sector:
+                if galacticObject[0:5] == "Fleet":
+                    return False
+            return True
+        return False
+        
 
     def combineWithFleetsInSector(self, fleet):
         sector = self.findSector((fleet.xPos, fleet.yPos))
@@ -402,10 +479,21 @@ class commandLineInterface:
             ownedByPlayer = False
             if fleet.side == currentPlayer.side:
                 ownedByPlayer = True
+
+            didMove = False
+            if fleet.moved == False and ownedByPlayer:
+                    didMove = self.moveFleet(galacticObject)
                 
             selection = ownedByPlayer
-            while selection:
-                r = raw_input("Combine this fleet with another in the sector? (yes/no): ")
+            while selection and not didMove:
+                alliedFleetsInSector = self.getOtherFleets(galacticObject, currentPlayer, position)
+                if alliedFleetsInSector == []:
+                    selection = False
+                    break
+                if selection == True:
+                    r = raw_input("Combine this fleet with another in the sector? (yes/no): ")
+                else:
+                    r = "no"
                 if r == "yes":
                     fleetSelection = self.selectOtherFleets(galacticObject, currentPlayer, position)
                     if fleetSelection != "none":
@@ -417,7 +505,11 @@ class commandLineInterface:
                     print("Invalid selection")
 
             selection = ownedByPlayer
-            while selection:
+            while selection and not didMove:
+                unitCount = fleet.numBattalions + fleet.numSquadrons + fleet.numHeros + fleet.numInfiltration
+                if unitCount < 2:
+                    selection = False
+                    break
                 r = raw_input("Split this fleet in to smaller fleets? (yes/no): ")
                 if r == "yes":
                     self.splitFleet(galacticObject)
@@ -426,18 +518,16 @@ class commandLineInterface:
                 else:
                     print("Invalid selection")
 
-            if fleet.moved == False and ownedByPlayer:
-                selection = True
-                while selection:
-                    r = raw_input("Move this fleet? (yes/no): ")
-                    if r == "yes":
-                        self.moveFleet(galacticObject)
-                        selection = False
-                    elif r == "no":
-                        selection = False
-                    else:
-                        print("Invalid selection")
             
+
+    def getOtherFleets(self, dontShow, player, pos):
+        alliedFleetsInSector = []
+        for galacticObject in self.findSector(pos):
+            if "Fleet" == galacticObject[0:5]:
+                if self.table.getFleet(galacticObject).side == player.side:
+                        if galacticObject != dontShow:
+                            alliedFleetsInSector += [galacticObject]
+        return alliedFleetsInSector
 
     def selectOtherFleets(self, dontShow, player, pos):
         selectionList = []
@@ -454,8 +544,9 @@ class commandLineInterface:
                 print("Combination cancelled")
                 selecting = False
                 return "none"
-            elif int(r)-1 < len(selectionList):
-                return selectionList[int(r)-1]
+            elif r.isdigit():
+                if int(r)-1 < len(selectionList):
+                    return selectionList[int(r)-1]
             else:
                 print("Invalid selection!")
 
@@ -522,10 +613,24 @@ class commandLineInterface:
             print("Fleet Split")
             
     def moveFleet(self, fleetName):
+        fleetContent = self.table.getFleet(fleetName)
+        contentFleetPos = self.findSector((fleetContent.xPos, fleetContent.yPos))
+        if fleetContent.numSquadrons == 0:
+            if fleetContent.numBattalions > 0:
+                for galacticObject in contentFleetPos:
+                    if galacticObject[0:5] == "Fleet":
+                        enemyFleet = self.table.getFleet(fleetName)
+                        if enemyFleet.side != fleetContent.side:
+                            if enemyFleet.numSquadrons > 0:
+                                print("Enemy Blockade prevents you from moving your Battalions away from the planet")
+                                return False
         print("Fleet can move up to 5 sectors")
         selecting = True
         while selecting:
-            position = raw_input("Select a sector to move to: ")
+            position = raw_input("Select a sector to move to (no to cancel): ")
+            if position == "no":
+                selecting = False
+                return False
             contentSector = self.findSector(position)
             if contentSector == "notASector":
                 print("Invalid Selection, please try again")
@@ -540,11 +645,13 @@ class commandLineInterface:
                 if totalDiff == 0:
                     print("Fleet holding same position")
                     selecting = False
+                    return False
                 if totalDiff <= 5:
                     self.table.updateFleetPosition(fleetName, newXPos, newYPos)
                     print("Fleet moved")
                     conflict = self.checkForConflict(newXPos, newYPos, position)
                     selecting = False
+                    return True
                 else:
                     print("That's too far away")
                         

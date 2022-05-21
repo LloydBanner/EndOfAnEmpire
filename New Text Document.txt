@@ -1,9 +1,0 @@
-convertToGridRef
-
-battalions can't leave planet if squadron in orbit
-
-Don't ask to combine and split if not needed
-
-Only ask if no to move
-
-Ai occasionally moving to postions that cause them to lose battalions

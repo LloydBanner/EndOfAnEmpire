@@ -192,6 +192,17 @@ class PlayingTable:
                             if reduceBy == 0:
                                 return
 
+    def getBattalionsEnemyInSector(self, side, xPos, yPos):
+        total = 0
+        for player in self.galaxy.players:
+            if player.side != side:
+                for fleet in player.fleets:
+                    if fleet.xPos == xPos:
+                        if fleet.yPos == yPos:
+                            total = total + fleet.numBattalions
+        return total
+        
+
     def removeBattalionsInSector(self, side, xPos, yPos):
         for player in self.galaxy.players:
             if player.side == side:
@@ -204,6 +215,16 @@ class PlayingTable:
                                     if fleet.numHeros == 0:
                                         if fleet.numInfiltration == 0:
                                             self.removeFleet(fleet.idVal)
+
+    def getSquadronsEnemyInSector(self, side, xPos, yPos):
+        total = 0
+        for player in self.galaxy.players:
+            if player.side != side:
+                for fleet in player.fleets:
+                    if fleet.xPos == xPos:
+                        if fleet.yPos == yPos:
+                            total = total + fleet.numSquadrons
+        return total
 
     def returnSpaceBattle(self):
         for climate in self.galaxy.climates:
