@@ -2,3 +2,4 @@ can't move away from planet when squadron in orbit
 if you make a squadron with squadron in orbit battle
 AI defend planets
 enemy throwing battalions away sometimes
+Have to fight to capture enemy planet (not enough battles) (more expensive battalions then though)
