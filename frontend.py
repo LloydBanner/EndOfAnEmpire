@@ -757,12 +757,43 @@ class commandLineInterface:
                 self.checkForConflict(newXPos, newYPos, position)
                     
                     
-        elif planetSide != "NOPLANET":
+        elif planetSide == "none":
             convertTo = self.table.getFleet(contentSector[1]).side
             if planetSide != convertTo:
                 self.table.convertPlanet(conflictedPlanet, convertTo)
                 print("Captured " + conflictedPlanet + " for the " + convertTo)
-            
+        elif planetSide != "NOPLANET":
+            side1Battalions = 0
+            side1Squadrons = 0
+            side1Heros = 0
+            side1Infiltration = 0
+            side1 = "NOSIDE"
+            for galacticObject in contentSector:
+                if "Fleet" == galacticObject[0:5]:
+                    fleetContent = self.table.getFleet(galacticObject)
+                    if side1 == "NOSIDE":
+                        side1 = fleetContent.side
+                    elif side2 == "NOSIDE":
+                        if fleetContent.side != side1:
+                            side2 = fleetContent.side
+
+                    if side1 == fleetContent.side:
+                        side1Battalions = side1Battalions + fleetContent.numBattalions
+                        side1Squadrons = side1Squadrons + fleetContent.numSquadrons
+                        side1Heros = side1Heros + fleetContent.numHeros
+                        side1Infiltration = side1Infiltration + fleetContent.numInfiltration
+
+            if side1Battalions > 0:
+                victor = self.comenceLandBattle(conflictedPlanet, side1, planetSide)
+                if victor == side1:
+                    convertTo = self.table.getFleet(contentSector[1]).side
+                    if planetSide != convertTo:
+                        self.table.convertPlanet(conflictedPlanet, convertTo)
+                        print("Captured " + conflictedPlanet + " for the " + convertTo)
+                else:
+                    self.table.reduceBattalionsInSector(side1, newXPos, newYPos, 1)
+                    print(side1 + " lost a battalion")
+                    
             
     def comenceSpaceBattle(self, side1, side2):
         #gamemode, map, game

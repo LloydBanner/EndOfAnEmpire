@@ -34,10 +34,15 @@ class PlayingTable:
         person = Player(playerSide, True)
         self.galaxy.players.append(person)
         self.whoseTurn = playerSide
+
+        aiSide = "none"
         for side in self.galaxy.sides:
             if side != playerSide:
+                aiSide = side
                 computer = Player(side, False)
                 self.galaxy.players.append(computer)
+
+        self.galaxy.convertNonePlayerPlanetsToAi(playerSide, aiSide)
 
     
     def returnGalaxyMap(self):
@@ -274,6 +279,11 @@ class Galaxy:
         self.size = 600
         self.galaxyMap = [[]]
         self.players = []
+
+    def convertNonePlayerPlanetsToAi(self, playerSide, aiSide):
+        for planet in self.planets:
+            if planet.owner != playerSide:
+                planet.owner = aiSide
 
     def hasPlanet(self, planetName):
         for planet in self.planets:
